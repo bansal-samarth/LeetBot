@@ -8,13 +8,19 @@ export default function ChatAssistant() {
   ]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const [sessionId, setSessionId] = useState(null); // State for session ID
+  const [sessionId, setSessionId] = useState(null);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   const chatContainerRef = useRef(null);
 
+  // This function now includes a check to prevent scrolling outside the chat container
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (messagesEndRef.current && chatContainerRef.current) {
+      chatContainerRef.current.scrollTo({
+        top: messagesEndRef.current.offsetTop,
+        behavior: 'smooth'
+      });
+    }
   };
 
   useEffect(() => {
@@ -29,7 +35,6 @@ export default function ChatAssistant() {
     try {
       console.log('Sending request to backend:', userMessage);
       
-      // Include session ID if available
       const requestBody = { 
         message: userMessage,
         ...(sessionId && { session_id: sessionId })
@@ -54,7 +59,6 @@ export default function ChatAssistant() {
         throw new Error(data.error);
       }
       
-      // Store session ID from response if it exists
       if (data.session_id) {
         setSessionId(data.session_id);
         console.log('Session ID set:', data.session_id);
@@ -70,17 +74,14 @@ export default function ChatAssistant() {
   const handleSend = async () => {
     if (input.trim() === '') return;
     
-    // Add user message
     const userMessage = input;
     const newMessages = [...messages, { id: Date.now(), text: userMessage, sender: 'user' }];
     setMessages(newMessages);
     setInput('');
     
-    // Show typing indicator
     setIsTyping(true);
     
     try {
-      // Get actual response from backend
       const botResponse = await fetchBotResponse(userMessage);
       
       setIsTyping(false);
@@ -105,14 +106,14 @@ export default function ChatAssistant() {
     }
   };
 
+  // Fixed handleKeyPress function
   const handleKeyPress = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
+      e.preventDefault(); // Prevent default
+      handleSend(); // Call handleSend directly
     }
   };
 
-  // Function to clear conversation and start a new problem
   const startNewProblem = async () => {
     if (sessionId) {
       try {
@@ -123,7 +124,6 @@ export default function ChatAssistant() {
           },
         });
         
-        // Reset UI
         setMessages([
           { id: 1, text: "I'm ready to help with a new problem! What would you like to work on now?", sender: 'bot' }
         ]);
@@ -132,105 +132,115 @@ export default function ChatAssistant() {
         console.error('Error clearing conversation:', error);
       }
     } else {
-      // If no session exists yet, just reset the UI
       setMessages([
         { id: 1, text: "I'm ready to help with a new problem! What would you like to work on now?", sender: 'bot' }
       ]);
     }
     
-    // Set focus back to input
     inputRef.current?.focus();
   };
 
   return (
-    <div className="chat-container">
-      {/* Header */}
-      <div className="chat-header">
-        <h1 className="header-title">
-          <span className="header-highlight">LEET</span>BOT
-        </h1>
-      </div>
-      
-      {/* Chat messages */}
-      <div ref={chatContainerRef} className="chat-messages">
-        {messages.map((message) => (
-          <div
-            key={message.id}
-            className={`message-row ${message.sender === 'user' ? 'message-row-user' : 'message-row-bot'}`}>
-            <div className={`message-bubble ${message.sender === 'user' ? 'user-bubble' : 'bot-bubble'}`}>
-              <div className="message-header">
-                {message.sender === 'bot' ? (
-                  <Bot size={18} />
-                ) : (
-                  <User size={18} />
-                )}
-                <span className="message-sender">
-                  {message.sender === 'bot' ? 'Leet' : 'You'}
-                </span>
-              </div>
-              <p className="message-text">
-                {message.text}
-              </p>
-            </div>
-          </div>
+    <div className="app-container">
+      {/* Floating particles for relaxing animation */}
+      <div className="particles-container">
+        {[...Array(15)].map((_, index) => (
+          <div key={index} className="particle"></div>
         ))}
-        
-        {isTyping && (
-          <div className="message-row message-row-bot">
-            <div className="message-bubble bot-bubble">
-              <div className="typing-indicator">
-                <div className="typing-dot" style={{ animationDelay: '0ms' }}></div>
-                <div className="typing-dot" style={{ animationDelay: '150ms' }}></div>
-                <div className="typing-dot" style={{ animationDelay: '300ms' }}></div>
-              </div>
-            </div>
-          </div>
-        )}
-        
-        <div ref={messagesEndRef} />
       </div>
       
-      {/* Input area */}
-      <div className="input-container">
-        <div className="input-wrapper">
-          {/* New Problem button (replaces Mic button) */}
-          <button 
-            className="new-problem-button"
-            onClick={startNewProblem}
-            aria-label="Start new problem"
-          >
-            <RotateCcw size={16} />
-            <span>New Problem</span>
-          </button>
+      <div className="chat-container">
+        {/* Glowing circles for modern effect */}
+        <div className="glow-circle glow-circle-1"></div>
+        <div className="glow-circle glow-circle-2"></div>
+        
+        {/* Header */}
+        <div className="chat-header">
+          <h1 className="header-title">
+            <span className="header-highlight">LEET</span>BOT
+          </h1>
+        </div>
+        
+        {/* Chat messages */}
+        <div ref={chatContainerRef} className="chat-messages">
+          {messages.map((message) => (
+            <div
+              key={message.id}
+              className={`message-row ${message.sender === 'user' ? 'message-row-user' : 'message-row-bot'}`}>
+              <div className={`message-bubble ${message.sender === 'user' ? 'user-bubble' : 'bot-bubble'}`}>
+                <div className="message-header">
+                  {message.sender === 'bot' ? (
+                    <Bot size={18} />
+                  ) : (
+                    <User size={18} />
+                  )}
+                  <span className="message-sender">
+                    {message.sender === 'bot' ? 'Leet' : 'You'}
+                  </span>
+                </div>
+                <p className="message-text">
+                  {message.text}
+                </p>
+              </div>
+            </div>
+          ))}
           
-          <div className="textarea-container">
-            <textarea
-              ref={inputRef}
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="Ask about any doubt or coding problem..."
-              className="chat-textarea"
-              rows="1"
-            />
+          {isTyping && (
+            <div className="message-row message-row-bot">
+              <div className="message-bubble bot-bubble">
+                <div className="typing-indicator">
+                  <div className="typing-dot" style={{ animationDelay: '0ms' }}></div>
+                  <div className="typing-dot" style={{ animationDelay: '150ms' }}></div>
+                  <div className="typing-dot" style={{ animationDelay: '300ms' }}></div>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          <div ref={messagesEndRef} />
+        </div>
+        
+        {/* Input area */}
+        <div className="input-container">
+          <div className="input-wrapper">
+            <button 
+              className="new-problem-button"
+              onClick={startNewProblem}
+              aria-label="Start new problem"
+            >
+              <RotateCcw size={16} />
+              <span>New Problem</span>
+            </button>
+            
+            <div className="textarea-container">
+              <textarea
+                ref={inputRef}
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={handleKeyPress}
+                placeholder="Ask about any doubt or coding problem..."
+                className="chat-textarea"
+                rows="1"
+              />
+              
+              <button 
+                className="scroll-button"
+                onClick={scrollToBottom}
+                aria-label="Scroll to bottom"
+              >
+                <ArrowDown size={18} />
+              </button>
+            </div>
             
             <button 
-              className="scroll-button"
-              onClick={scrollToBottom}
-              aria-label="Scroll to bottom"
+              onClick={handleSend}
+              disabled={input.trim() === ''}
+              className={`send-button ${input.trim() === '' ? 'send-button-disabled' : ''}`}
+              aria-label="Send message"
             >
-              <ArrowDown size={18} />
+              <Send size={20} />
             </button>
           </div>
-          
-          <button 
-            onClick={handleSend}
-            disabled={input.trim() === ''}
-            className={`send-button ${input.trim() === '' ? 'send-button-disabled' : ''}`}
-            aria-label="Send message"
-          >
-            <Send size={20} />
-          </button>
         </div>
       </div>
     </div>

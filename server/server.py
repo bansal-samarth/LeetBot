@@ -88,7 +88,7 @@ async def chat(request: ChatMessage):
         ]
         
         # Add conversation history (max 10 most recent messages to stay within context window)
-        messages.extend(conversation_store[session_id][-10:])
+        messages.extend(conversation_store[session_id][-100:])
         
         # Make API call
         chat_completion = client.chat.completions.create(

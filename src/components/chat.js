@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, User, Bot, ArrowDown, RotateCcw } from 'lucide-react';
+import { Send, User, Bot, ArrowDown, RotateCcw ,Github as GitHub} from 'lucide-react';
 import './ChatAssistant.css';
 import Prism from 'prismjs';
 import 'prismjs/themes/prism-okaidia.css';
@@ -215,8 +215,8 @@ export default function ChatAssistant() {
     <div className="app-container">
       {/* Floating particles for relaxing animation */}
       <div className="particles-container">
-        {[...Array(15)].map((_, index) => (
-          <div key={index} className="particle"></div>
+        {[...Array(8)].map((_, index) => (
+          <div key={index} className="firefly"></div>
         ))}
       </div>
       
@@ -230,6 +230,17 @@ export default function ChatAssistant() {
           <h1 className="header-title">
             <span className="header-highlight">LEET</span>BOT
           </h1>
+          <div className="header-icons">
+            <a href="https://github.com/bansal-samarth" target="_blank" rel="noopener noreferrer" className="social-icon">
+              <GitHub size={20} />
+            </a>
+            <a href="https://leetcode.com/samarthbansal" target="_blank" rel="noopener noreferrer" className="social-icon">
+              <span className="leetcode-letter">L</span>
+            </a>
+            <a href="https://auth.geeksforgeeks.org/user/worksamarr4t9" target="_blank" rel="noopener noreferrer" className="social-icon">
+              <span className="gfg-letter">G</span>
+            </a>
+          </div>
         </div>
         
         {/* Chat messages */}

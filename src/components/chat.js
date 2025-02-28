@@ -8,6 +8,7 @@ export default function ChatAssistant() {
   ]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [sessionId, setSessionId] = useState(null); // New state for session ID
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   const chatContainerRef = useRef(null);
@@ -28,14 +29,20 @@ export default function ChatAssistant() {
     try {
       console.log('Sending request to backend:', userMessage);
       
+      // Include session ID if available
+      const requestBody = { 
+        message: userMessage,
+        ...(sessionId && { session_id: sessionId })
+      };
+      
       const response = await fetch('http://localhost:8000/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
         },
-        body: JSON.stringify({ message: userMessage }),
-        mode: 'cors', // Explicitly request CORS mode
+        body: JSON.stringify(requestBody),
+        mode: 'cors',
       });
       
       console.log('Response status:', response.status);
@@ -45,6 +52,12 @@ export default function ChatAssistant() {
       
       if (data.error) {
         throw new Error(data.error);
+      }
+      
+      // Store session ID from response if it exists
+      if (data.session_id) {
+        setSessionId(data.session_id);
+        console.log('Session ID set:', data.session_id);
       }
       
       return data.assistant_response;
@@ -99,6 +112,28 @@ export default function ChatAssistant() {
     }
   };
 
+  // Add function to clear conversation
+  const clearConversation = async () => {
+    if (sessionId) {
+      try {
+        await fetch(`http://localhost:8000/history/${sessionId}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        
+        // Reset UI
+        setMessages([
+          { id: 1, text: "Hello! I'm Leet, your coding assistant. How can I help you with your algorithms today?", sender: 'bot' }
+        ]);
+        setSessionId(null);
+      } catch (error) {
+        console.error('Error clearing conversation:', error);
+      }
+    }
+  };
+
   return (
     <div className="chat-container">
       {/* Header */}
@@ -106,6 +141,16 @@ export default function ChatAssistant() {
         <h1 className="header-title">
           <span className="header-highlight">LEET</span>BOT
         </h1>
+        {/* Optional: Add reset button */}
+        {sessionId && (
+          <button 
+            onClick={clearConversation} 
+            className="reset-button"
+            aria-label="Clear conversation"
+          >
+            Clear Chat
+          </button>
+        )}
       </div>
       
       {/* Chat messages */}

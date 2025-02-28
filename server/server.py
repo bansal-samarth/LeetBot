@@ -1,5 +1,6 @@
 import os
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 from groq import Groq
 
@@ -15,6 +16,15 @@ client = Groq(api_key=GROQ_API_KEY)
 
 # Initialize FastAPI
 app = FastAPI()
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allows all origins in development (restrict this in production)
+    allow_credentials=True,
+    allow_methods=["*"],  # Allows all methods
+    allow_headers=["*"],  # Allows all headers
+)
 
 # Chat API Endpoint (Accepting Dictionary Input)
 @app.post("/chat")
@@ -42,6 +52,7 @@ async def chat(request: dict):
         }
 
     except Exception as e:
+        print(f"Error: {str(e)}")
         return {"error": str(e)}
 
 # Root Route

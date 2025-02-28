@@ -23,30 +23,73 @@ export default function ChatAssistant() {
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
+  
+  const fetchBotResponse = async (userMessage) => {
+    try {
+      console.log('Sending request to backend:', userMessage);
+      
+      const response = await fetch('http://localhost:8000/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify({ message: userMessage }),
+        mode: 'cors', // Explicitly request CORS mode
+      });
+      
+      console.log('Response status:', response.status);
+      
+      const data = await response.json();
+      console.log('Response data:', data);
+      
+      if (data.error) {
+        throw new Error(data.error);
+      }
+      
+      return data.assistant_response;
+    } catch (error) {
+      console.error('Error fetching response:', error);
+      return `Sorry, I encountered an error. Please check the console for details.`;
+    }
+  };
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (input.trim() === '') return;
     
     // Add user message
-    const newMessages = [...messages, { id: Date.now(), text: input, sender: 'user' }];
+    const userMessage = input;
+    const newMessages = [...messages, { id: Date.now(), text: userMessage, sender: 'user' }];
     setMessages(newMessages);
     setInput('');
     
-    // Simulate bot typing
+    // Show typing indicator
     setIsTyping(true);
     
-    // Simulate bot response after a delay
-    setTimeout(() => {
+    try {
+      // Get actual response from backend
+      const botResponse = await fetchBotResponse(userMessage);
+      
       setIsTyping(false);
-      setMessages([
-        ...newMessages,
+      setMessages(prevMessages => [
+        ...prevMessages,
         { 
           id: Date.now() + 1, 
-          text: `I've analyzed your code problem. Let me help you optimize the solution for: "${input}"`, 
+          text: botResponse, 
           sender: 'bot' 
         }
       ]);
-    }, 1500);
+    } catch (error) {
+      setIsTyping(false);
+      setMessages(prevMessages => [
+        ...prevMessages,
+        { 
+          id: Date.now() + 1, 
+          text: "Sorry, I couldn't process your request at the moment. Please try again.", 
+          sender: 'bot' 
+        }
+      ]);
+    }
   };
 
   const handleKeyPress = (e) => {

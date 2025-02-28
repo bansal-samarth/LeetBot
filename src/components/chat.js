@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, User, Bot, Mic, ArrowDown } from 'lucide-react';
+import { Send, User, Bot, ArrowDown, RotateCcw } from 'lucide-react';
 import './ChatAssistant.css';
 
 export default function ChatAssistant() {
@@ -8,7 +8,7 @@ export default function ChatAssistant() {
   ]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const [sessionId, setSessionId] = useState(null); // New state for session ID
+  const [sessionId, setSessionId] = useState(null); // State for session ID
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   const chatContainerRef = useRef(null);
@@ -112,8 +112,8 @@ export default function ChatAssistant() {
     }
   };
 
-  // Add function to clear conversation
-  const clearConversation = async () => {
+  // Function to clear conversation and start a new problem
+  const startNewProblem = async () => {
     if (sessionId) {
       try {
         await fetch(`http://localhost:8000/history/${sessionId}`, {
@@ -125,13 +125,21 @@ export default function ChatAssistant() {
         
         // Reset UI
         setMessages([
-          { id: 1, text: "Hello! I'm Leet, your coding assistant. How can I help you with your algorithms today?", sender: 'bot' }
+          { id: 1, text: "I'm ready to help with a new problem! What would you like to work on now?", sender: 'bot' }
         ]);
         setSessionId(null);
       } catch (error) {
         console.error('Error clearing conversation:', error);
       }
+    } else {
+      // If no session exists yet, just reset the UI
+      setMessages([
+        { id: 1, text: "I'm ready to help with a new problem! What would you like to work on now?", sender: 'bot' }
+      ]);
     }
+    
+    // Set focus back to input
+    inputRef.current?.focus();
   };
 
   return (
@@ -141,16 +149,6 @@ export default function ChatAssistant() {
         <h1 className="header-title">
           <span className="header-highlight">LEET</span>BOT
         </h1>
-        {/* Optional: Add reset button */}
-        {sessionId && (
-          <button 
-            onClick={clearConversation} 
-            className="reset-button"
-            aria-label="Clear conversation"
-          >
-            Clear Chat
-          </button>
-        )}
       </div>
       
       {/* Chat messages */}
@@ -195,11 +193,14 @@ export default function ChatAssistant() {
       {/* Input area */}
       <div className="input-container">
         <div className="input-wrapper">
+          {/* New Problem button (replaces Mic button) */}
           <button 
-            className="icon-button"
-            aria-label="Voice input"
+            className="new-problem-button"
+            onClick={startNewProblem}
+            aria-label="Start new problem"
           >
-            <Mic size={22} />
+            <RotateCcw size={16} />
+            <span>New Problem</span>
           </button>
           
           <div className="textarea-container">
@@ -208,7 +209,7 @@ export default function ChatAssistant() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyPress={handleKeyPress}
-              placeholder="Ask about any algorithm or coding problem..."
+              placeholder="Ask about any doubt or coding problem..."
               className="chat-textarea"
               rows="1"
             />

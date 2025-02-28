@@ -15,43 +15,43 @@
 
 /* Header styles - with fade out effect */
 .chat-header {
-background: linear-gradient(to bottom, #000000 60%, rgba(0, 0, 0, 0));
-padding: 18px 20px 30px 20px; /* Increased bottom padding for fade effect */
-border-bottom: none; /* Remove border for smooth fade */
-position: relative;
-z-index: 10;
+  background: linear-gradient(to bottom, #000000 60%, rgba(0, 0, 0, 0));
+  padding: 18px 20px 30px 20px; /* Increased bottom padding for fade effect */
+  border-bottom: none; /* Remove border for smooth fade */
+  position: relative;
+  z-index: 10;
 }
 
 .header-title {
-font-size: 1.6rem;
-font-weight: 800;
-display: flex;
-align-items: center;
-margin: 0;
-letter-spacing: -0.5px;
+  font-size: 1.6rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  margin: 0;
+  letter-spacing: -0.5px;
 }
 
 .header-highlight {
-color: #FFA116;
-margin-right: 2px;
+  color: #FFA116;
+  margin-right: 2px;
 }
 
 /* Adjust chat messages to account for overlapping fade */
 .chat-messages {
-flex: 1;
-overflow-y: auto;
-padding: 0 20px 20px 20px;
-padding-top: 30px; /* Add padding at top to account for header overlap */
-margin-top: -30px; /* Negative margin to pull content up under faded header */
-display: flex;
-flex-direction: column;
-gap: 18px;
-background-color: #1A1A1A;
-background-image: 
-    radial-gradient(circle at 25% 25%, rgba(255, 161, 22, 0.03) 0%, transparent 40%), 
-    radial-gradient(circle at 75% 75%, rgba(255, 161, 22, 0.03) 0%, transparent 40%);
-position: relative;
-z-index: 1;
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 20px 20px 20px;
+  padding-top: 30px; /* Add padding at top to account for header overlap */
+  margin-top: -30px; /* Negative margin to pull content up under faded header */
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  background-color: #1A1A1A;
+  background-image: 
+      radial-gradient(circle at 25% 25%, rgba(255, 161, 22, 0.03) 0%, transparent 40%), 
+      radial-gradient(circle at 75% 75%, rgba(255, 161, 22, 0.03) 0%, transparent 40%);
+  position: relative;
+  z-index: 1;
 }
 
 /* Message rows */
@@ -189,22 +189,6 @@ z-index: 1;
   flex: 1;
 }
 
-.chat-textarea {
-  width: 100%;
-  padding: 15px;
-  padding-right: 45px;
-  background-color: #262626;
-  color: white;
-  border: none;
-  border-radius: 12px;
-  font-family: 'Inter', sans-serif;
-  font-size: 1.5rem;
-  resize: none;
-  min-height: 50px;
-  max-height: 150px;
-  outline: none;
-  transition: box-shadow 0.2s ease;
-}
 
 .chat-textarea:focus {
   box-shadow: 0 0 0 2px #FFA116;
@@ -214,18 +198,94 @@ z-index: 1;
   color: #808080;
 }
 
-.reset-button {
-  background-color: #f2f2f2;
+/* Default New Problem Button (With Text) */
+.new-problem-button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #f5f5f5;
+  color: #333;
   border: none;
-  border-radius: 4px;
-  padding: 5px 10px;
-  font-size: 12px;
+  border-radius: 12px;
+  padding: 25px 20px;
+  font-size: 15px;
+  font-weight: bold;
   cursor: pointer;
-  margin-left: auto;
+  transition: all 0.2s ease;
+  white-space: nowrap;
 }
 
-.reset-button:hover {
-  background-color: #e0e0e0;
+.new-problem-button:hover {
+  background-color: #4CAF50;
+  color: white;
+}
+
+/* Hide Text & Adjust Size on Small Screens */
+@media (max-width: 768px) {
+  .new-problem-button {
+    padding: 10px;
+    width: 40px;   /* Make it square */
+    height: 40px;
+    justify-content: center;
+  }
+
+  .new-problem-button span {
+    display: none; /* Hide text */
+  }
+
+  .new-problem-button i {
+    font-size: 18px; /* Adjust icon size */
+  }
+}
+
+.input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+/* Align the send button to the right */
+.textarea-container {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.chat-textarea {
+  width: 100%;
+  padding: 12px; /* Reduce padding */
+  padding-right: 45px;
+  background-color: #262626;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-family: 'Inter', sans-serif;
+  font-size: 1.2rem; /* Reduce font size */
+  resize: none;
+  min-height: 40px; /* Reduce min height */
+  max-height: 100px; /* Reduce max height */
+  outline: none;
+  transition: box-shadow 0.2s ease;
+}
+
+
+
+.send-button:hover {
+  background-color: #FFB84D;
+  transform: scale(1.05);
+}
+
+.send-button:active {
+  transform: scale(0.98);
+}
+
+.send-button-disabled {
+  background-color: #3C3C3C;
+  color: #555555;
+  cursor: not-allowed;
+  transform: none;
 }
 
 /* Scroll button - updated */
@@ -338,5 +398,59 @@ z-index: 1;
 
   .chat-textarea {
     font-size: 1rem;
+  }
+}
+
+/* Make the buttons responsive */
+@media (max-width: 768px) {
+  .new-problem-button {
+    padding: 10px;
+    font-size: 0;  /* Hide text */
+    width: 40px;   /* Make it square */
+    height: 40px;
+    justify-content: center;
+  }
+
+  .new-problem-button i {
+    font-size: 18px; /* Adjust icon size */
+  }
+
+  .send-button {
+    padding: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .new-problem-button {
+    padding: 8px 14px;
+    font-size: 12px;
+  }
+
+  .send-button {
+    padding: 10px;
+  }
+}
+
+@media (max-width: 768px) {
+  .input-container {
+    padding: 10px; /* Reduce padding */
+  }
+
+  .chat-textarea {
+    font-size: 1rem;
+    min-height: 40px; /* Reduce height */
+    padding: 10px; /* Reduce padding */
+  }
+}
+
+@media (max-width: 480px) {
+  .input-container {
+    padding: 8px; /* Further reduce padding */
+  }
+
+  .chat-textarea {
+    font-size: 0.9rem;
+    min-height: 35px; /* Further reduce height */
+    padding: 8px;
   }
 }

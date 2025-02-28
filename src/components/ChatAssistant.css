@@ -321,4 +321,8 @@ z-index: 1;
   .message-text {
     font-size: 0.95rem;
   }
+
+  .chat-textarea {
+    font-size: 1rem;
+  }
 }

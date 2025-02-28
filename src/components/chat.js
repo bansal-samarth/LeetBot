@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, User, Bot, ArrowDown, RotateCcw } from 'lucide-react';
 import './ChatAssistant.css';
+import Prism from 'prismjs';
+import 'prismjs/themes/prism-okaidia.css';
 
 export default function ChatAssistant() {
   const [messages, setMessages] = useState([
@@ -22,6 +24,75 @@ export default function ChatAssistant() {
       });
     }
   };
+
+  const copyCode = async (e) => {
+    const button = e.currentTarget;
+    const codeBlock = button.closest('.code-block');
+    const codeContent = codeBlock.querySelector('code').textContent;
+  
+    try {
+      await navigator.clipboard.writeText(codeContent);
+      button.textContent = 'Copied!';
+      button.style.backgroundColor = '#4CAF50'; // Green color feedback
+      button.style.borderColor = '#4CAF50';
+      
+      // Reset after 1.5 seconds
+      setTimeout(() => {
+        button.textContent = 'Copy';
+        button.style.backgroundColor = '';
+        button.style.borderColor = '#FFA116';
+      }, 1500);
+    } catch (err) {
+      console.error('Failed to copy code:', err);
+      button.textContent = 'Error';
+      setTimeout(() => {
+        button.textContent = 'Copy';
+      }, 1500);
+    }
+  };
+
+  const formatMessageWithCode = (text) => {
+    // First process code blocks
+    const parts = text.split(/(```[\s\S]*?```)/g);
+    return parts.map((part, index) => {
+      if (part.startsWith('```')) {
+        const [language, ...code] = part.replace(/```/g, '').split('\n');
+        return (
+          <div key={`code-${index}`} className="code-block">
+            <div className="code-header">
+              <span className="code-language">{language.trim() || 'python'}</span>
+              <button className="copy-button" onClick={copyCode}>
+                Copy
+              </button>
+            </div>
+            <pre><code>{code.join('\n').trim()}</code></pre>
+          </div>
+        );
+      }
+      
+      // Then process inline code highlights within regular text
+      const inlineParts = part.split(/(`[^`]+`)/g);
+      return (
+        <span key={`text-${index}`}>
+          {inlineParts.map((inlinePart, i) => {
+            if (inlinePart.startsWith('`') && inlinePart.endsWith('`')) {
+              const codeContent = inlinePart.slice(1, -1);
+              return (
+                <span key={`inline-code-${i}`} className="inline-code">
+                  {codeContent}
+                </span>
+              );
+            }
+            return inlinePart;
+          })}
+        </span>
+      );
+    });
+  };
+
+  useEffect(() => {
+    Prism.highlightAll();
+  }, [messages]);
 
   useEffect(() => {
     scrollToBottom();
@@ -179,7 +250,7 @@ export default function ChatAssistant() {
                   </span>
                 </div>
                 <p className="message-text">
-                  {message.text}
+                  {formatMessageWithCode(message.text)}
                 </p>
               </div>
             </div>

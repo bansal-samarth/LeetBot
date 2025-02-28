@@ -1,5 +1,6 @@
 /* Import modern fonts */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&display=swap');
 
 /* App container - outer wrapper */
 .app-container {
@@ -231,13 +232,25 @@
   margin-left: 8px;
 }
 
+/* Update message text styling */
 .message-text {
+  font-size: 1rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.message-text p {
+  margin-bottom: 1rem;
+}
+
+/* .message-text {
   font-size: 1rem;
   line-height: 1.5;
   margin: 0;
   word-wrap: break-word;
   overflow-wrap: break-word;
-}
+} */
 
 /* Typing indicator */
 .typing-indicator {
@@ -507,4 +520,113 @@ html, body {
   .send-button {
     padding: 12px;
   }
+}
+
+/* Add these styles to your existing CSS */
+.code-block {
+  position: relative;
+  margin: 1rem 0;
+  border-radius: 12px;
+  background: #1E1E1E !important;
+  border: 1px solid #333;
+  overflow-x: auto;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.9em;
+  line-height: 1.5;
+}
+
+.code-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  background: #2D2D2D;
+  border-bottom: 1px solid #333;
+  border-radius: 12px 12px 0 0;
+}
+
+.code-language {
+  color: #FFA116;
+  font-size: 0.85em;
+  font-weight: 600;
+}
+
+.copy-button {
+  background: none;
+  border: 1px solid #FFA116;
+  color: #FFA116;
+  padding: 0.25rem 0.75rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.copy-button:hover {
+  background: rgba(255, 161, 22, 0.1);
+}
+
+pre code {
+  display: block;
+  padding: 1rem;
+  color: #D4D4D4;
+}
+
+pre code .keyword {
+  color: #569CD6;
+}
+
+pre code .function {
+  color: #DCDCAA;
+}
+
+pre code .string {
+  color: #CE9178;
+}
+
+pre code .number {
+  color: #B5CEA8;
+}
+
+pre code .comment {
+  color: #6A9955;
+}
+
+.copy-button {
+  /* existing styles */
+  transition: all 0.2s ease, background-color 0.3s, border-color 0.3s;
+}
+
+.copy-button.copied {
+  background-color: #4CAF50 !important;
+  border-color: #4CAF50 !important;
+}
+
+.copy-button.error {
+  background-color: #ff4444 !important;
+  border-color: #ff4444 !important;
+}
+
+/* Inline code styling */
+.inline-code {
+  font-family: 'Fira Code', monospace;
+  background-color: #2D2D2D;
+  color: #FFA116;
+  padding: 0.2em 0.4em;
+  border-radius: 4px;
+  border: 1px solid #3C3C3C;
+  font-size: 0.9em;
+  line-height: 1.4;
+  margin: 0 2px;
+  white-space: nowrap;
+}
+
+/* Make code blocks stand out more */
+.code-block {
+  margin: 1.2rem 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+pre code {
+  padding: 1.2rem;
+  display: block;
 }

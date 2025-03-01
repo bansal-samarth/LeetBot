@@ -6,7 +6,7 @@ import 'prismjs/themes/prism-okaidia.css';
 
 export default function ChatAssistant() {
   const [messages, setMessages] = useState([
-    { id: 1, text: "Hello! I'm Leet, your coding assistant. How can I help you with your algorithms today?", sender: 'bot' }
+    { id: 1, text: "Hello! I'm Leet, your coding assistant. Share a LeetCode link, and I'll guide you through it.", sender: 'bot' }
   ]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -291,7 +291,7 @@ export default function ChatAssistant() {
               aria-label="Start new problem"
             >
               <RotateCcw size={16} />
-              <span>New Problem</span>
+              <span>New Chat</span>
             </button>
             
             <div className="textarea-container">

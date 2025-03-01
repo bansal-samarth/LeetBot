@@ -1,16 +1,14 @@
 import os
-import json
-import uuid
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 from groq import Groq
 from pydantic import BaseModel
+import uuid
 from typing import Dict, List, Optional
 
 # Load API key from .env file
-load_dotenv()
-GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+GROQ_API_KEY = "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"
 
 # Ensure API key is loaded
 if not GROQ_API_KEY:
@@ -31,30 +29,6 @@ app.add_middleware(
     allow_headers=["*"],  # Allows all headers
 )
 
-# File path to store chat sessions
-CHAT_HISTORY_FILE = "chat_sessions.json"
-
-# Ensure the file exists
-if not os.path.exists(CHAT_HISTORY_FILE):
-    with open(CHAT_HISTORY_FILE, "w") as f:
-        json.dump({}, f)
-
-# Load conversation history from file
-def load_conversations():
-    try:
-        with open(CHAT_HISTORY_FILE, "r") as f:
-            return json.load(f)
-    except Exception:
-        return {}
-
-# Save conversation history to file
-def save_conversations(conversations):
-    with open(CHAT_HISTORY_FILE, "w") as f:
-        json.dump(conversations, f)
-
-# Load existing conversations on startup
-conversation_store = load_conversations()
-
 # Define models for request and response
 class ChatMessage(BaseModel):
     message: str
@@ -65,6 +39,10 @@ class ChatResponse(BaseModel):
     user_input: str
     assistant_response: str
     session_id: str
+
+# In-memory conversation store
+# In a production app, you would use Redis or a database
+conversation_store: Dict[str, List[Dict[str, str]]] = {}
 
 # System prompt
 SYSTEM_PROMPT = """
@@ -105,36 +83,42 @@ You are an expert Data Structures and Algorithms teaching assistant whose goal i
 
 Remember: Response should be clear, relevant, and tailored to lead the user to a logical progression in their problem-solving process. Your success is measured by the student's learning journey, not by giving them answers.
 """
+
+# Chat API Endpoint
 @app.post("/chat", response_model=ChatResponse)
 async def chat(request: ChatMessage):
     try:
         user_message = request.message
-        session_id = request.session_id or str(uuid.uuid4())
+        session_id = request.session_id
 
-        # Retrieve session history
-        if session_id not in conversation_store:
+        # Create or retrieve session
+        if not session_id or session_id not in conversation_store:
+            session_id = str(uuid.uuid4())
             conversation_store[session_id] = []
-
-        # Append user message
+        
+        # Add user message to conversation history
         conversation_store[session_id].append({"role": "user", "content": user_message})
-
-        # Keep only the last 10 messages for context
-        messages = [{"role": "system", "content": SYSTEM_PROMPT}] + conversation_store[session_id][-10:]
-
-        # Call Groq API
+        
+        # Prepare messages for LLM
+        messages = [
+            {"role": "system", "content": SYSTEM_PROMPT}
+        ]
+        
+        # Add conversation history (max 10 most recent messages to stay within context window)
+        messages.extend(conversation_store[session_id][-100:])
+        
+        # Make API call
         chat_completion = client.chat.completions.create(
             messages=messages,
             model="llama3-8b-8192",
         )
         
+        # Get assistant response
         assistant_response = chat_completion.choices[0].message.content
-
-        # Append assistant response
+        
+        # Store assistant response in conversation history
         conversation_store[session_id].append({"role": "assistant", "content": assistant_response})
-
-        # Save conversation to file
-        save_conversations(conversation_store)
-
+        
         return {
             "status": "success",
             "user_input": user_message,
@@ -146,19 +130,23 @@ async def chat(request: ChatMessage):
         print(f"Error: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
+# Get conversation history
 @app.get("/history/{session_id}")
 async def get_history(session_id: str):
     if session_id not in conversation_store:
         raise HTTPException(status_code=404, detail="Session not found")
+    
     return {"conversation": conversation_store[session_id]}
 
+# Clear conversation history
 @app.delete("/history/{session_id}")
 async def clear_history(session_id: str):
     if session_id in conversation_store:
         del conversation_store[session_id]
-        save_conversations(conversation_store)
+    
     return {"status": "success", "message": "Conversation history cleared"}
 
+# Root Route
 @app.get("/")
 def read_root():
     return {"message": "Welcome to LEETBOT!"}

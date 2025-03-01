@@ -23,8 +23,6 @@
 - [Optimization Techniques](#-optimization-techniques)
 - [Security Considerations](#-security-considerations)
 - [Deployment Status](#-deployment-status)
-- [Roadmap](#-roadmap)
-- [Contribution Guidelines](#-contribution-guidelines)
 - [License](#-license)
 
 ## 🔭 Overview
@@ -394,26 +392,6 @@ LeetBot incorporates several security measures:
 - Performance metrics collection configured
 - Error tracking implemented with detailed logging
 - Usage analytics dashboard in development
-
-## 🛣️ Roadmap
-
-### Short-term Objectives (Q2 2025)
-- Implement persistent database storage (MongoDB)
-- Add user authentication system
-- Develop problem categorization and tagging
-- Create difficulty-based problem recommendations
-
-### Medium-term Goals (Q3-Q4 2025)
-- Integrate code execution environment
-- Implement spaced repetition system for concept reinforcement
-- Develop personalized learning paths
-- Add support for multiple programming languages
-
-### Long-term Vision
-- Create community-driven problem sets
-- Develop advanced performance analytics
-- Implement adaptive difficulty progression
-- Integrate with IDE extensions
 
 ## 📄 License
 

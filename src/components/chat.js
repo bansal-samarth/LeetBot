@@ -111,7 +111,7 @@ export default function ChatAssistant() {
         ...(sessionId && { session_id: sessionId })
       };
       
-      const response = await fetch('http://localhost:8000/chat', {
+      const response = await fetch('https://leetbot-b7uw.onrender.com/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -188,7 +188,7 @@ export default function ChatAssistant() {
   const startNewProblem = async () => {
     if (sessionId) {
       try {
-        await fetch(`http://localhost:8000/history/${sessionId}`, {
+        await fetch(`https://leetbot-b7uw.onrender.com/history/${sessionId}`, {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',

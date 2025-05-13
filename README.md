@@ -10,6 +10,14 @@
   <img src="https://github.com/user-attachments/assets/3cdc536a-3361-49d5-8c34-0274cea7d6f3" alt="LeetBot Mobile View" width="200">
 </p>
 
+## 🚀 Live Demo
+
+**📱 Frontend:** [https://leetbot.vercel.app/](https://leetbot.vercel.app/)
+
+**⚙️ Backend API:** [https://leetbot-b7uw.onrender.com](https://leetbot.onrender.com)
+
+---
+
 ## 📚 Table of Contents
 - [Overview](#-overview)
 - [Key Features](#-key-features)

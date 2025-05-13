@@ -52,30 +52,31 @@ export default function ChatAssistant() {
   };
 
   const formatMessageWithCode = (text) => {
-    // First process code blocks
+    // Split into code blocks and regular text
     const parts = text.split(/(```[\s\S]*?```)/g);
+    
     return parts.map((part, index) => {
       if (part.startsWith('```')) {
+        // Existing code block handling
         const [language, ...code] = part.replace(/```/g, '').split('\n');
         return (
           <div key={`code-${index}`} className="code-block">
             <div className="code-header">
               <span className="code-language">{language.trim() || 'python'}</span>
-              <button className="copy-button" onClick={copyCode}>
-                Copy
-              </button>
+              <button className="copy-button" onClick={copyCode}>Copy</button>
             </div>
             <pre><code>{code.join('\n').trim()}</code></pre>
           </div>
         );
       }
       
-      // Then process inline code highlights within regular text
+      // Process text with inline code and bold formatting
       const inlineParts = part.split(/(`[^`]+`)/g);
       return (
         <span key={`text-${index}`}>
           {inlineParts.map((inlinePart, i) => {
             if (inlinePart.startsWith('`') && inlinePart.endsWith('`')) {
+              // Inline code handling
               const codeContent = inlinePart.slice(1, -1);
               return (
                 <span key={`inline-code-${i}`} className="inline-code">
@@ -83,7 +84,24 @@ export default function ChatAssistant() {
                 </span>
               );
             }
-            return inlinePart;
+            
+            // Split and process bold text
+            const boldParts = inlinePart.split(/(\*\*.*?\*\*)/g);
+            return (
+              <span key={`bold-${i}`}>
+                {boldParts.map((boldPart, j) => {
+                  if (boldPart.startsWith('**') && boldPart.endsWith('**')) {
+                    const content = boldPart.slice(2, -2);
+                    return (
+                      <strong key={`bold-${j}`} className="bold-text">
+                        {content}
+                      </strong>
+                    );
+                  }
+                  return boldPart;
+                })}
+              </span>
+            );
           })}
         </span>
       );

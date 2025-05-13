@@ -6,9 +6,16 @@ from groq import Groq
 from pydantic import BaseModel
 import uuid
 from typing import Dict, List, Optional
+from pymongo import MongoClient
+from pymongo.collection import Collection
 
-# Load API key from .env file
-GROQ_API_KEY = "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"
+# Load environment variables
+load_dotenv()
+
+# Load API keys from .env file
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+MONGODB_URI = os.getenv("MONGODB_URI")
+DB_NAME = os.getenv("DB_NAME", "leetbot")
 
 # Ensure API key is loaded
 if not GROQ_API_KEY:
@@ -29,6 +36,11 @@ app.add_middleware(
     allow_headers=["*"],  # Allows all headers
 )
 
+# MongoDB connection
+mongo_client = MongoClient(MONGODB_URI)
+db = mongo_client[DB_NAME]
+conversations_collection = db["conversations"]
+
 # Define models for request and response
 class ChatMessage(BaseModel):
     message: str
@@ -39,10 +51,6 @@ class ChatResponse(BaseModel):
     user_input: str
     assistant_response: str
     session_id: str
-
-# In-memory conversation store
-# In a production app, you would use Redis or a database
-conversation_store: Dict[str, List[Dict[str, str]]] = {}
 
 # System prompt
 SYSTEM_PROMPT = """
@@ -84,6 +92,26 @@ You are an expert Data Structures and Algorithms teaching assistant whose goal i
 Remember: Response should be clear, relevant, and tailored to lead the user to a logical progression in their problem-solving process. Your success is measured by the student's learning journey, not by giving them answers.
 """
 
+# MongoDB helper functions
+def get_conversation_history(session_id: str) -> List[Dict[str, str]]:
+    """Retrieve conversation history from MongoDB"""
+    session = conversations_collection.find_one({"_id": session_id})
+    if session:
+        return session.get("messages", [])
+    return []
+
+def save_message(session_id: str, message: Dict[str, str]):
+    """Save a message to the conversation history in MongoDB"""
+    conversations_collection.update_one(
+        {"_id": session_id},
+        {"$push": {"messages": message}},
+        upsert=True
+    )
+
+def clear_conversation(session_id: str):
+    """Clear the conversation history for a session"""
+    conversations_collection.delete_one({"_id": session_id})
+
 # Chat API Endpoint
 @app.post("/chat", response_model=ChatResponse)
 async def chat(request: ChatMessage):
@@ -92,32 +120,37 @@ async def chat(request: ChatMessage):
         session_id = request.session_id
 
         # Create or retrieve session
-        if not session_id or session_id not in conversation_store:
+        if not session_id:
             session_id = str(uuid.uuid4())
-            conversation_store[session_id] = []
+        
+        # Get conversation history from MongoDB
+        conversation_history = get_conversation_history(session_id)
         
         # Add user message to conversation history
-        conversation_store[session_id].append({"role": "user", "content": user_message})
+        user_message_obj = {"role": "user", "content": user_message}
+        save_message(session_id, user_message_obj)
         
         # Prepare messages for LLM
         messages = [
             {"role": "system", "content": SYSTEM_PROMPT}
         ]
         
-        # Add conversation history (max 10 most recent messages to stay within context window)
-        messages.extend(conversation_store[session_id][-100:])
+        # Add conversation history (max 100 most recent messages to stay within context window)
+        messages.extend(conversation_history[-100:])
+        messages.append(user_message_obj)
         
         # Make API call
         chat_completion = client.chat.completions.create(
             messages=messages,
-            model="llama3-8b-8192",
+            model="meta-llama/llama-4-maverick-17b-128e-instruct",
         )
         
         # Get assistant response
         assistant_response = chat_completion.choices[0].message.content
         
         # Store assistant response in conversation history
-        conversation_store[session_id].append({"role": "assistant", "content": assistant_response})
+        assistant_message = {"role": "assistant", "content": assistant_response}
+        save_message(session_id, assistant_message)
         
         return {
             "status": "success",
@@ -133,20 +166,29 @@ async def chat(request: ChatMessage):
 # Get conversation history
 @app.get("/history/{session_id}")
 async def get_history(session_id: str):
-    if session_id not in conversation_store:
+    conversation_history = get_conversation_history(session_id)
+    if not conversation_history:
         raise HTTPException(status_code=404, detail="Session not found")
     
-    return {"conversation": conversation_store[session_id]}
+    return {"conversation": conversation_history}
 
 # Clear conversation history
 @app.delete("/history/{session_id}")
 async def clear_history(session_id: str):
-    if session_id in conversation_store:
-        del conversation_store[session_id]
-    
+    clear_conversation(session_id)
     return {"status": "success", "message": "Conversation history cleared"}
 
 # Root Route
 @app.get("/")
 def read_root():
     return {"message": "Welcome to LEETBOT!"}
+
+# Health check endpoint
+@app.get("/health")
+def health_check():
+    try:
+        # Check MongoDB connection
+        mongo_client.admin.command('ping')
+        return {"status": "healthy", "mongo": "connected"}
+    except Exception as e:
+        return {"status": "unhealthy", "error": str(e)}

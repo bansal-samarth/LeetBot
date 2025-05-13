@@ -779,3 +779,28 @@ pre code {
   padding: 1.2rem;
   display: block;
 }
+
+.bold-text {
+  font-weight: 700;
+  color: #FFA116;
+  letter-spacing: -0.3px;
+  text-shadow: 0 2px 4px rgba(255, 161, 22, 0.15);
+}
+
+.message-text strong {
+  font-weight: 700;
+  background: linear-gradient(to right, #FFA116, #FFC46B);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  padding: 0 2px;
+}
+
+/* Add to existing .message-text styles */
+.message-text {
+  font-size: 1rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-variant-ligatures: none;
+}
